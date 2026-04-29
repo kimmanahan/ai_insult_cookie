@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Misfortune Cookie</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0a07;
+      --paper: #f5e6c8;
+      --paper-dark: #e8d4a8;
+      --ink: #1a0f00;
+      --gold: #c9933a;
+      --gold-light: #f0c060;
+      --red: #8b1a1a;
+      --red-glow: rgba(139,26,26,0.4);
+      --shadow: rgba(0,0,0,0.8);
+    }
+
+    body {
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'IM Fell English', serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Ambient background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 100%, rgba(139,26,26,0.15) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 20% 20%, rgba(201,147,58,0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 30% 40% at 80% 10%, rgba(201,147,58,0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Noise grain */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    .lantern {
+      position: fixed;
+      top: -10px;
+      font-size: 3rem;
+      filter: drop-shadow(0 0 20px var(--red-glow)) drop-shadow(0 0 8px var(--red-glow));
+      animation: sway 4s ease-in-out infinite;
+      z-index: 1;
+    }
+    .lantern-left { left: 8%; animation-delay: -1.3s; }
+    .lantern-right { right: 8%; }
+
+    @keyframes sway {
+      0%, 100% { transform: rotate(-4deg); }
+      50% { transform: rotate(4deg); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      padding: 2rem 1.5rem;
+      width: 100%;
+      max-width: 620px;
+    }
+
+    header {
+      text-align: center;
+    }
+
+    .title {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: clamp(1.3rem, 4vw, 2rem);
+      color: var(--gold-light);
+      letter-spacing: 0.08em;
+      text-shadow:
+        0 0 30px rgba(201,147,58,0.6),
+        0 0 60px rgba(201,147,58,0.2),
+        2px 2px 0 rgba(0,0,0,0.8);
+      line-height: 1.3;
+    }
+
+    .subtitle {
+      margin-top: 0.4rem;
+      font-style: italic;
+      color: rgba(201,147,58,0.55);
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+    }
+
+    /* Fortune cookie visual */
+    .cookie-wrap {
+      position: relative;
+      width: 120px;
+      height: 80px;
+      cursor: pointer;
+    }
+
+    .cookie-svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 4px 20px rgba(201,147,58,0.4));
+      transition: filter 0.3s;
+    }
+
+    .cookie-wrap:hover .cookie-svg {
+      filter: drop-shadow(0 4px 30px rgba(201,147,58,0.7));
+    }
+
+    /* Paper slip */
+    .paper-container {
+      width: 100%;
+      min-height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .paper {
+      background: var(--paper);
+      border-radius: 2px;
+      padding: 2rem 2.2rem;
+      width: 100%;
+      position: relative;
+      box-shadow:
+        0 2px 0 var(--paper-dark),
+        0 4px 0 rgba(0,0,0,0.3),
+        0 8px 30px rgba(0,0,0,0.6),
+        inset 0 0 60px rgba(0,0,0,0.05);
+      transform-origin: center;
+      animation: unfurl 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    }
+
+    @keyframes unfurl {
+      from { transform: scaleY(0.1) scaleX(0.8); opacity: 0; }
+      to { transform: scaleY(1) scaleX(1); opacity: 1; }
+    }
+
+    /* Paper texture lines */
+    .paper::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        transparent,
+        transparent 27px,
+        rgba(0,0,0,0.04) 27px,
+        rgba(0,0,0,0.04) 28px
+      );
+      border-radius: 2px;
+      pointer-events: none;
+    }
+
+    /* Torn edge top */
+    .paper::after {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg,
+        var(--paper) 0%, var(--paper-dark) 20%, var(--paper) 35%,
+        var(--paper-dark) 55%, var(--paper) 70%, var(--paper-dark) 85%, var(--paper) 100%
+      );
+      clip-path: polygon(0% 0%, 2% 100%, 5% 20%, 8% 90%, 12% 10%, 16% 80%, 20% 0%,
+        24% 100%, 28% 20%, 32% 85%, 36% 5%, 40% 90%, 44% 15%, 48% 100%,
+        52% 10%, 56% 80%, 60% 0%, 64% 95%, 68% 20%, 72% 90%, 76% 5%,
+        80% 85%, 84% 15%, 88% 95%, 92% 10%, 96% 80%, 100% 0%, 100% 100%, 0% 100%);
+    }
+
+    .fortune-text {
+      font-family: 'IM Fell English', serif;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      line-height: 1.7;
+      color: var(--ink);
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .lucky-numbers {
+      margin-top: 1rem;
+      font-size: 0.72rem;
+      color: var(--red);
+      letter-spacing: 0.25em;
+      font-style: italic;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .placeholder {
+      color: rgba(201,147,58,0.35);
+      font-style: italic;
+      font-size: 0.95rem;
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+
+    /* Button */
+    .btn {
+      position: relative;
+      padding: 0.85rem 3rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: 0.85rem;
+      color: var(--gold-light);
+      letter-spacing: 0.15em;
+      outline: none;
+      transition: transform 0.15s, color 0.2s;
+    }
+
+    .btn::before, .btn::after {
+      content: '';
+      position: absolute;
+      transition: all 0.2s;
+    }
+
+    /* border corners */
+    .btn::before {
+      inset: 0;
+      border: 1px solid rgba(201,147,58,0.4);
+      clip-path: polygon(
+        0 8px, 8px 0, calc(100% - 8px) 0, 100% 8px,
+        100% calc(100% - 8px), calc(100% - 8px) 100%,
+        8px 100%, 0 calc(100% - 8px)
+      );
+    }
+
+    .btn::after {
+      inset: 3px;
+      border: 1px solid rgba(201,147,58,0.15);
+      clip-path: polygon(
+        0 6px, 6px 0, calc(100% - 6px) 0, 100% 6px,
+        100% calc(100% - 6px), calc(100% - 6px) 100%,
+        6px 100%, 0 calc(100% - 6px)
+      );
+    }
+
+    .btn:hover {
+      color: var(--gold-light);
+      transform: translateY(-1px);
+    }
+
+    .btn:hover::before {
+      border-color: rgba(201,147,58,0.9);
+      box-shadow: 0 0 20px rgba(201,147,58,0.3), inset 0 0 20px rgba(201,147,58,0.05);
+    }
+
+    .btn:active { transform: translateY(1px); }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Loading dots */
+    .loading {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.2; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .error-msg {
+      color: var(--red);
+      font-size: 0.8rem;
+      font-style: italic;
+      text-align: center;
+      opacity: 0.8;
+    }
+
+    footer {
+      font-size: 0.65rem;
+      color: rgba(201,147,58,0.2);
+      letter-spacing: 0.15em;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="lantern lantern-left">🏮</div>
+  <div class="lantern lantern-right">🏮</div>
+
+  <div class="container">
+    <header>
+      <div class="title">Misfortune Cookie</div>
+      <div class="subtitle">the truth you didn't ask for</div>
+    </header>
+
+    <!-- Cookie SVG -->
+    <div class="cookie-wrap" onclick="generate()" title="Click to crack open">
+      <svg class="cookie-svg" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="cg" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#f0c060"/>
+            <stop offset="50%" stop-color="#c9933a"/>
+            <stop offset="100%" stop-color="#8b5a1a"/>
+          </radialGradient>
+          <radialGradient id="cg2" cx="60%" cy="65%" r="65%">
+            <stop offset="0%" stop-color="#d4a035"/>
+            <stop offset="100%" stop-color="#7a4a10"/>
+          </radialGradient>
+        </defs>
+        <!-- Left half -->
+        <path d="M60 40 Q30 5 8 18 Q-5 40 8 58 Q30 72 60 40Z" fill="url(#cg)" stroke="#8b5a1a" stroke-width="0.5"/>
+        <!-- Right half -->
+        <path d="M60 40 Q90 5 112 18 Q125 40 112 58 Q90 72 60 40Z" fill="url(#cg2)" stroke="#8b5a1a" stroke-width="0.5"/>
+        <!-- Center fold -->
+        <path d="M60 40 Q58 48 56 50 Q60 54 64 50 Q62 48 60 40Z" fill="#6a3a08" opacity="0.6"/>
+        <!-- Shine left -->
+        <path d="M20 22 Q35 15 50 25" stroke="rgba(255,240,180,0.4)" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Shine right -->
+        <path d="M70 25 Q85 15 100 22" stroke="rgba(255,240,180,0.25)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <!-- Fortune paper -->
+    <div class="paper-container" id="paperContainer">
+      <div class="placeholder" id="placeholder">
+        Crack it open. Receive what you deserve.
+      </div>
+    </div>
+
+    <button class="btn" id="btn" onclick="generate()">
+      <span id="btnText">Face Your Truth</span>
+    </button>
+
+    <footer>The cookie has spoken. Therapy is available elsewhere.</footer>
+  </div>
+
+  <script>
+    // Replace with your deployed Cloudflare Worker URL.
+    const WORKER_URL = 'https://misfortune-cookie.YOUR-SUBDOMAIN.workers.dev/fortune';
+
+    let loading = false;
+
+    async function generate() {
+      if (loading) return;
+
+      loading = true;
+      const btn = document.getElementById('btn');
+      const btnText = document.getElementById('btnText');
+      btn.disabled = true;
+      btnText.innerHTML = '<span class="loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>';
+
+      // Remove old paper
+      const container = document.getElementById('paperContainer');
+      const oldPaper = container.querySelector('.paper');
+      if (oldPaper) container.removeChild(oldPaper);
+      const placeholder = document.getElementById('placeholder');
+      if (placeholder) placeholder.style.display = 'none';
+
+      try {
+        const res = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.error || `HTTP ${res.status}`);
+        }
+
+        const raw = data.text || '';
+        const parts = raw.split(/UNLUCKY:/i);
+        const fortuneText = parts[0].trim();
+        const luckyRaw = parts[1] ? parts[1].trim() : null;
+
+        renderPaper(fortuneText, luckyRaw);
+
+      } catch (err) {
+        showError('Even the oracle is ghosting you. ' + err.message);
+        if (placeholder) placeholder.style.display = '';
+      } finally {
+        loading = false;
+        btn.disabled = false;
+        btnText.textContent = 'Hurt Me Again';
+      }
+    }
+
+    function renderPaper(fortune, lucky) {
+      const container = document.getElementById('paperContainer');
+
+      const paper = document.createElement('div');
+      paper.className = 'paper';
+
+      const ft = document.createElement('div');
+      ft.className = 'fortune-text';
+      ft.textContent = fortune;
+      paper.appendChild(ft);
+
+      if (lucky) {
+        const ln = document.createElement('div');
+        ln.className = 'lucky-numbers';
+        ln.textContent = '✦  Unlucky Numbers: ' + lucky + '  ✦';
+        paper.appendChild(ln);
+      }
+
+      container.appendChild(paper);
+    }
+
+    function showError(msg) {
+      const container = document.getElementById('paperContainer');
+      const existing = container.querySelector('.error-msg');
+      if (existing) container.removeChild(existing);
+
+      const err = document.createElement('div');
+      err.className = 'error-msg';
+      err.textContent = msg;
+      container.appendChild(err);
+
+      setTimeout(() => { if (err.parentNode) err.parentNode.removeChild(err); }, 5000);
+    }
+  </script>
+</body>
+</html>
